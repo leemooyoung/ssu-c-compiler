@@ -1,3 +1,6 @@
+%{
+extern int line_no;
+%}
 %start program
 %token
 IDENTIFIER
@@ -356,3 +359,10 @@ type_name
     : declaration_specifiers abstract_declarator_opt
     ;
 %%
+
+extern char *yytext;
+
+int yyerror(char *s) {
+    printf("line %d: %s near %s\n", line_no, s, yytext);
+    exit(1);
+}

@@ -1,5 +1,9 @@
 %{
-extern int line_no;
+// extern int line_no;
+#include <stdio.h>
+#include <stdlib.h>
+int yyerror();
+extern int yylex();
 %}
 %start program
 %token
@@ -360,9 +364,10 @@ type_name
     ;
 %%
 
-extern char *yytext;
+// extern char *yytext;
 
 int yyerror(char *s) {
-    printf("line %d: %s near %s\n", line_no, s, yytext);
+    // printf("line %d: %s near %s\n", line_no, s, yytext);
+    printf("%s\n", s);
     exit(1);
 }

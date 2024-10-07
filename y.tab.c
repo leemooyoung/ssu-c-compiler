@@ -69,9 +69,13 @@
 /* First part of user prologue.  */
 #line 1 "ssu_c.y"
 
-extern int line_no;
+// extern int line_no;
+#include <stdio.h>
+#include <stdlib.h>
+int yyerror();
+extern int yylex();
 
-#line 75 "y.tab.c"
+#line 79 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -94,10 +98,7 @@ extern int line_no;
 #  endif
 # endif
 
-/* Use api.header.include to #include this header
-   instead of duplicating it here.  */
-#ifndef YY_YY_Y_TAB_H_INCLUDED
-# define YY_YY_Y_TAB_H_INCLUDED
+
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -248,7 +249,7 @@ extern YYSTYPE yylval;
 int yyparse (void);
 
 
-#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
+
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -771,23 +772,23 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    63,    63,    66,    67,    70,    71,    74,    75,    78,
-      79,    82,    83,    86,    89,    90,    91,    92,    95,    96,
-      97,   100,   101,   104,   105,   108,   109,   111,   112,   115,
-     116,   119,   120,   121,   124,   125,   126,   129,   130,   133,
-     134,   137,   140,   141,   144,   147,   148,   149,   152,   153,
-     156,   157,   159,   160,   163,   164,   167,   168,   169,   170,
-     173,   174,   177,   178,   181,   182,   185,   186,   189,   190,
-     193,   194,   195,   198,   199,   200,   201,   202,   205,   206,
-     209,   210,   213,   214,   215,   216,   217,   218,   221,   222,
-     225,   228,   229,   232,   233,   234,   237,   238,   239,   242,
-     245,   246,   249,   250,   251,   255,   256,   259,   260,   263,
-     264,   267,   270,   273,   276,   277,   280,   283,   284,   287,
-     288,   291,   294,   297,   300,   301,   302,   305,   306,   307,
-     308,   309,   312,   315,   316,   317,   320,   321,   322,   323,
-     326,   327,   330,   331,   332,   333,   334,   335,   336,   337,
-     338,   339,   342,   343,   344,   345,   346,   347,   348,   351,
-     352,   353,   354,   355,   356,   359
+       0,    67,    67,    70,    71,    74,    75,    78,    79,    82,
+      83,    86,    87,    90,    93,    94,    95,    96,    99,   100,
+     101,   104,   105,   108,   109,   112,   113,   115,   116,   119,
+     120,   123,   124,   125,   128,   129,   130,   133,   134,   137,
+     138,   141,   144,   145,   148,   151,   152,   153,   156,   157,
+     160,   161,   163,   164,   167,   168,   171,   172,   173,   174,
+     177,   178,   181,   182,   185,   186,   189,   190,   193,   194,
+     197,   198,   199,   202,   203,   204,   205,   206,   209,   210,
+     213,   214,   217,   218,   219,   220,   221,   222,   225,   226,
+     229,   232,   233,   236,   237,   238,   241,   242,   243,   246,
+     249,   250,   253,   254,   255,   259,   260,   263,   264,   267,
+     268,   271,   274,   277,   280,   281,   284,   287,   288,   291,
+     292,   295,   298,   301,   304,   305,   306,   309,   310,   311,
+     312,   313,   316,   319,   320,   321,   324,   325,   326,   327,
+     330,   331,   334,   335,   336,   337,   338,   339,   340,   341,
+     342,   343,   346,   347,   348,   349,   350,   351,   352,   355,
+     356,   357,   358,   359,   360,   363
 };
 #endif
 
@@ -1594,7 +1595,7 @@ yyreduce:
   switch (yyn)
     {
 
-#line 1598 "y.tab.c"
+#line 1599 "y.tab.c"
 
       default: break;
     }
@@ -1787,12 +1788,13 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 361 "ssu_c.y"
+#line 365 "ssu_c.y"
 
 
-extern char *yytext;
+// extern char *yytext;
 
 int yyerror(char *s) {
-    printf("line %d: %s near %s\n", line_no, s, yytext);
+    // printf("line %d: %s near %s\n", line_no, s, yytext);
+    printf("%s\n", s);
     exit(1);
 }

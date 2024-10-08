@@ -532,8 +532,9 @@ char *yytext;
 #line 8 "ssu_c.l"
 #include "y.tab.h"
 int checkIdentifier();
-#line 536 "lex.yy.c"
+int line_no = 1;
 #line 537 "lex.yy.c"
+#line 538 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -750,9 +751,9 @@ YY_DECL
 		}
 
 	{
-#line 12 "ssu_c.l"
+#line 13 "ssu_c.l"
 
-#line 756 "lex.yy.c"
+#line 757 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -811,287 +812,287 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 13 "ssu_c.l"
+#line 14 "ssu_c.l"
 { }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 14 "ssu_c.l"
-{ }
+#line 15 "ssu_c.l"
+{ line_no++; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 15 "ssu_c.l"
+#line 16 "ssu_c.l"
 { return(AUTO_SYM); }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 16 "ssu_c.l"
+#line 17 "ssu_c.l"
 { return(BREAK_SYM); }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 17 "ssu_c.l"
+#line 18 "ssu_c.l"
 { return(CASE_SYM); }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 18 "ssu_c.l"
+#line 19 "ssu_c.l"
 { return(CONTINUE_SYM); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 19 "ssu_c.l"
+#line 20 "ssu_c.l"
 { return(DEFAULT_SYM); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 20 "ssu_c.l"
+#line 21 "ssu_c.l"
 { return(DO_SYM); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 21 "ssu_c.l"
+#line 22 "ssu_c.l"
 { return(ELSE_SYM); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 22 "ssu_c.l"
+#line 23 "ssu_c.l"
 { return(ENUM_SYM); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 23 "ssu_c.l"
+#line 24 "ssu_c.l"
 { return(FOR_SYM); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 24 "ssu_c.l"
+#line 25 "ssu_c.l"
 { return(IF_SYM); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 25 "ssu_c.l"
+#line 26 "ssu_c.l"
 { return(RETURN_SYM); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 26 "ssu_c.l"
+#line 27 "ssu_c.l"
 { return(SIZEOF_SYM); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 27 "ssu_c.l"
+#line 28 "ssu_c.l"
 { return(STATIC_SYM); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 28 "ssu_c.l"
+#line 29 "ssu_c.l"
 { return(STRUCT_SYM); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 29 "ssu_c.l"
+#line 30 "ssu_c.l"
 { return(SWITCH_SYM); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 30 "ssu_c.l"
+#line 31 "ssu_c.l"
 { return(TYPEDEF_SYM); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 31 "ssu_c.l"
+#line 32 "ssu_c.l"
 { return(UNION_SYM); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 32 "ssu_c.l"
+#line 33 "ssu_c.l"
 { return(WHILE_SYM); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 33 "ssu_c.l"
+#line 34 "ssu_c.l"
 { return(PLUSPLUS); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 34 "ssu_c.l"
+#line 35 "ssu_c.l"
 { return(MINUSMINUS); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 35 "ssu_c.l"
+#line 36 "ssu_c.l"
 { return(ARROW); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 36 "ssu_c.l"
+#line 37 "ssu_c.l"
 { return(LSS); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 37 "ssu_c.l"
+#line 38 "ssu_c.l"
 { return(GTR); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 38 "ssu_c.l"
+#line 39 "ssu_c.l"
 { return(LEQ); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 39 "ssu_c.l"
+#line 40 "ssu_c.l"
 { return(GEQ); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 40 "ssu_c.l"
+#line 41 "ssu_c.l"
 { return(EQL); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 41 "ssu_c.l"
+#line 42 "ssu_c.l"
 { return(NEQ); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 42 "ssu_c.l"
+#line 43 "ssu_c.l"
 { return(AMPAMP); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 43 "ssu_c.l"
+#line 44 "ssu_c.l"
 { return(BARBAR); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 44 "ssu_c.l"
+#line 45 "ssu_c.l"
 { return(DOTDOTDOT); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 45 "ssu_c.l"
+#line 46 "ssu_c.l"
 { return(LP); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 46 "ssu_c.l"
+#line 47 "ssu_c.l"
 { return(RP); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 47 "ssu_c.l"
+#line 48 "ssu_c.l"
 { return(LB); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 48 "ssu_c.l"
+#line 49 "ssu_c.l"
 { return(RB); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 49 "ssu_c.l"
+#line 50 "ssu_c.l"
 { return(LR); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 50 "ssu_c.l"
+#line 51 "ssu_c.l"
 { return(RR); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 51 "ssu_c.l"
+#line 52 "ssu_c.l"
 { return(COLON); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 52 "ssu_c.l"
+#line 53 "ssu_c.l"
 { return(PERIOD); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 53 "ssu_c.l"
+#line 54 "ssu_c.l"
 { return(COMMA); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 54 "ssu_c.l"
+#line 55 "ssu_c.l"
 { return(EXCL); }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 55 "ssu_c.l"
+#line 56 "ssu_c.l"
 { return(STAR); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 56 "ssu_c.l"
+#line 57 "ssu_c.l"
 { return(SLASH); }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 57 "ssu_c.l"
+#line 58 "ssu_c.l"
 { return(PERCENT); }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 58 "ssu_c.l"
+#line 59 "ssu_c.l"
 { return(AMP); }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 59 "ssu_c.l"
+#line 60 "ssu_c.l"
 { return(SEMICOLON); }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 60 "ssu_c.l"
+#line 61 "ssu_c.l"
 { return(PLUS); }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 61 "ssu_c.l"
+#line 62 "ssu_c.l"
 { return(MINUS); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 62 "ssu_c.l"
+#line 63 "ssu_c.l"
 { return(ASSIGN); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 63 "ssu_c.l"
+#line 64 "ssu_c.l"
 { return(INTEGER_CONSTANT);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 64 "ssu_c.l"
+#line 65 "ssu_c.l"
 { return(FLOAT_CONSTANT);}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 65 "ssu_c.l"
+#line 66 "ssu_c.l"
 { return(checkIdentifier(yytext));}
 	YY_BREAK
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 66 "ssu_c.l"
+#line 67 "ssu_c.l"
 { return(STRING_LITERAL);}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 67 "ssu_c.l"
+#line 68 "ssu_c.l"
 { return(CHARACTER_CONSTANT);}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 68 "ssu_c.l"
+#line 69 "ssu_c.l"
 ECHO;
 	YY_BREAK
-#line 1095 "lex.yy.c"
+#line 1096 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2096,7 +2097,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 68 "ssu_c.l"
+#line 69 "ssu_c.l"
 
 
 int checkIdentifier(char *s) {

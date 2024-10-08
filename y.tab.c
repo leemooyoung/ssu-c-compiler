@@ -69,7 +69,7 @@
 /* First part of user prologue.  */
 #line 1 "ssu_c.y"
 
-// extern int line_no;
+extern int line_no;
 #include <stdio.h>
 #include <stdlib.h>
 int yyerror();
@@ -98,7 +98,10 @@ extern int yylex();
 #  endif
 # endif
 
-
+/* Use api.header.include to #include this header
+   instead of duplicating it here.  */
+#ifndef YY_YY_Y_TAB_H_INCLUDED
+# define YY_YY_Y_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -249,7 +252,7 @@ extern YYSTYPE yylval;
 int yyparse (void);
 
 
-
+#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -1595,7 +1598,7 @@ yyreduce:
   switch (yyn)
     {
 
-#line 1599 "y.tab.c"
+#line 1602 "y.tab.c"
 
       default: break;
     }
@@ -1791,10 +1794,9 @@ yyreturnlab:
 #line 365 "ssu_c.y"
 
 
-// extern char *yytext;
+extern char *yytext;
 
 int yyerror(char *s) {
-    // printf("line %d: %s near %s\n", line_no, s, yytext);
-    printf("%s\n", s);
+    printf("line %d: %s near %s\n", line_no, s, yytext);
     exit(1);
 }

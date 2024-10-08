@@ -7,11 +7,12 @@ ws                                  {delim}+
 %{
 #include "y.tab.h"
 int checkIdentifier();
+int line_no = 1;
 %}
 
 %%
 {ws}                                { }
-{line}                              { }
+{line}                              { line_no++; }
 auto                                { return(AUTO_SYM); }
 break                               { return(BREAK_SYM); }
 case                                { return(CASE_SYM); }

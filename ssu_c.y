@@ -1,5 +1,5 @@
 %{
-// extern int line_no;
+extern int line_no;
 #include <stdio.h>
 #include <stdlib.h>
 int yyerror();
@@ -364,10 +364,9 @@ type_name
     ;
 %%
 
-// extern char *yytext;
+extern char *yytext;
 
 int yyerror(char *s) {
-    // printf("line %d: %s near %s\n", line_no, s, yytext);
-    printf("%s\n", s);
+    printf("line %d: %s near %s\n", line_no, s, yytext);
     exit(1);
 }

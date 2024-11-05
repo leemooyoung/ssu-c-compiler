@@ -70,7 +70,7 @@ CASE_SYM
 DEFAULT_SYM
 %%
 program
-    : translation_unit
+    : translation_unit { checkForwardReference(); }
     ;
 translation_unit
     : external_declaration
@@ -133,7 +133,7 @@ type_specifier
 struct_type_specifier
     : struct_or_union IDENTIFIER { $$ = makeIdentifier($2); }
     LR { $$ = current_id; current_level++; } struct_declaration_list RR
-    { current_level--; current_id = $5; }
+    { checkForwardReference(); current_level--; current_id = $5; }
     | struct_or_union LR { $$ = current_id; current_level++; }
     struct_declaration_list RR { current_level--; current_id = $3; }
     | struct_or_union IDENTIFIER
@@ -182,7 +182,8 @@ direct_declarator
     | LP declarator RP
     | direct_declarator LB constant_expression_opt RB
     | direct_declarator LP { $$ = current_id; current_level++; }
-    parameter_type_list_opt RP { current_level--; current_id = $3; }
+    parameter_type_list_opt RP
+    { checkForwardReference(); current_level--; current_id = $3; }
     ;
 parameter_type_list_opt
     :
@@ -238,7 +239,8 @@ labeled_statement
     ;
 compound_statement
     : LR { $$ = current_id; current_level++; } declaration_list_opt
-    statement_list_opt RR { current_level--; current_id = $2; }
+    statement_list_opt RR
+    { checkForwardReference(); current_level--; current_id = $2; }
     ;
 expression_statement
     : SEMICOLON

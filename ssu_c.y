@@ -1,7 +1,13 @@
 %{
-extern int line_no;
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "type.h"
+#include "support.h"
+
+extern int line_no;
+extern A_ID *current_id;
+extern int current_level;
 int yyerror();
 extern int yylex();
 %}
@@ -125,8 +131,11 @@ type_specifier
     | TYPE_IDENTIFIER
     ;
 struct_type_specifier
-    : struct_or_union IDENTIFIER LR struct_declaration_list RR
-    | struct_or_union LR struct_declaration_list RR
+    : struct_or_union IDENTIFIER { $$ = makeIdentifier($2); }
+    LR { $$ = current_id; current_level++; } struct_declaration_list RR
+    { current_level--; current_id = $5; }
+    | struct_or_union LR { $$ = current_id; current_level++; }
+    struct_declaration_list RR { current_level--; current_id = $3; }
     | struct_or_union IDENTIFIER
     ;
 struct_or_union
@@ -148,7 +157,7 @@ struct_declarator
     : declarator
     ;
 enum_type_specifier
-    : ENUM_SYM IDENTIFIER LR enumerator_list RR
+    : ENUM_SYM IDENTIFIER { $$ = makeIdentifier($2); } LR enumerator_list RR
     | ENUM_SYM LR enumerator_list RR
     | ENUM_SYM IDENTIFIER
     ;
@@ -157,8 +166,9 @@ enumerator_list
     | enumerator_list COMMA enumerator
     ;
 enumerator
-    : IDENTIFIER
-    | IDENTIFIER ASSIGN constant_expression /* why book and lecture note different? */
+    : IDENTIFIER { $$ = makeIdentifier($1); }
+    | IDENTIFIER { $$ = makeIdentifier($1); } ASSIGN constant_expression
+    ;
 declarator
     : pointer direct_declarator
     | direct_declarator
@@ -168,10 +178,11 @@ pointer
     | STAR pointer
     ;
 direct_declarator
-    : IDENTIFIER
+    : IDENTIFIER { $$ = makeIdentifier($1); }
     | LP declarator RP
     | direct_declarator LB constant_expression_opt RB
-    | direct_declarator LP parameter_type_list_opt RP
+    | direct_declarator LP { $$ = current_id; current_level++; }
+    parameter_type_list_opt RP { current_level--; current_id = $3; }
     ;
 parameter_type_list_opt
     :
@@ -226,7 +237,8 @@ labeled_statement
     | DEFAULT_SYM COLON statement
     ;
 compound_statement
-    : LR declaration_list_opt statement_list_opt RR
+    : LR { $$ = current_id; current_level++; } declaration_list_opt
+    statement_list_opt RR { current_level--; current_id = $2; }
     ;
 expression_statement
     : SEMICOLON
@@ -253,7 +265,6 @@ jump_statement
     : RETURN_SYM expression_opt SEMICOLON
     | CONTINUE_SYM SEMICOLON
     | BREAK_SYM SEMICOLON
-    /* | GOTO_SYM IDENTIFIER - doesn't we use goto? */
     ;
 arg_expression_list_opt
     :

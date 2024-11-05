@@ -1,3 +1,13 @@
+#ifndef YYSTYPE_IS_DECLARED
+
+#define YYSTYPE_IS_DECLARED 1
+typedef long YYSTYPE;
+
+#endif
+
+#ifndef __SSU_C_TYPE__
+#define __SSU_C_TYPE__
+
 #define NIL 0
 
 typedef enum { FALSE, TRUE } BOOLEAN;
@@ -152,3 +162,5 @@ typedef struct {
   S_KIND stor;
   int line;
 } A_SPECIFIER;
+
+#endif

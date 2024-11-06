@@ -1,6 +1,7 @@
 Language: Cpp
 BasedOnStyle: Google
 AlignAfterOpenBracket: BlockIndent
+BreakBeforeBinaryOperators: true
 Cpp11BracedListStyle: true
 ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 2

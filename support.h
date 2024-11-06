@@ -3,6 +3,13 @@
 #ifndef __SSU_C_SUPPORT__
 #define __SSU_C_SUPPORT__
 
+extern A_TYPE *int_type, *char_type, *void_type, *float_type, *string_type;
+extern A_NODE *root;
+extern A_ID *current_id;
+extern int syntax_err;
+extern int line_no;
+extern int current_level;
+
 A_NODE *makeNode(NODE_NAME, A_NODE *, A_NODE *, A_NODE *);
 A_NODE *makeNodeList(NODE_NAME, A_NODE *, A_NODE *);
 A_ID *makeIdentifier(char *);

@@ -5,10 +5,6 @@
 #include "type.h"
 #include "support.h"
 
-extern int line_no;
-extern A_NODE *root;
-extern A_ID *current_id;
-extern int current_level;
 int yyerror();
 extern int yylex();
 %}
@@ -83,8 +79,12 @@ external_declaration
     | declaration { $$ = $1; }
     ;
 function_definition
-    : declaration_specifiers declarator compound_statement
-    | declarator compound_statement
+    : declaration_specifiers declarator
+    { $$ = setFunctionDeclaratorSpecifier($2, $1); }
+    compound_statement { $$ = setFunctionDeclaratorBody($3, $4); }
+    | declarator
+    { $$ = setFunctionDeclaratorSpecifier($1, makeSpecifier(int_type, 0)); }
+    compound_statement { $$ = setFunctionDeclaratorBody($2, $3); }
     ;
 declaration_list_opt
     :

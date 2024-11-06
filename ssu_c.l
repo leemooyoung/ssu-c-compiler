@@ -8,7 +8,6 @@ ws                                  {delim}+
 #include "type.h"
 #include "y.tab.h"
 
-extern YYSTYPE yylval;
 extern A_ID *current_id;
 extern int line_no;
 

@@ -7,6 +7,7 @@
 #include "type.h"
 
 extern char *yytext;
+
 A_TYPE *int_type, *char_type, *void_type, *float_type, *string_type;
 A_NODE *root;
 A_ID *current_id = NIL;
@@ -27,6 +28,8 @@ A_NODE *makeNode(NODE_NAME n, A_NODE *a, A_NODE *b, A_NODE *c) {
   return m;
 }
 
+A_NODE *makeNodeList(NODE_NAME, A_NODE *, A_NODE *);
+
 // create symbol table
 A_ID *makeIdentifier(char *s) {
   A_ID *id;
@@ -46,6 +49,31 @@ A_ID *makeIdentifier(char *s) {
   return id;
 }
 
+A_ID *makeDummyIdentifier(void);
+A_TYPE *makeType(T_KIND);
+
+A_SPECIFIER *makeSpecifier(A_TYPE *t, S_KIND s) {
+  A_SPECIFIER *p;
+  p = malloc(sizeof(A_SPECIFIER));
+  p->type = t;
+  p->stor = s;
+  p->line = line_no;
+  return p;
+}
+
+A_ID *searchIdentifier(char *, A_ID *);
+
+A_ID *searchIdentifierAtCurrentLevel(char *s, A_ID *id) {
+  while (id) {
+    if (id->level < current_level) return NIL;
+    if (strcmp(id->name, s) == 0) break;
+    id = id->prev;
+  }
+  return id;
+}
+
+A_SPECIFIER *updateSpecifier(A_SPECIFIER *, A_TYPE *, S_KIND);
+
 // check if references configured well when end of scope
 void checkForwardReference(void) {
   A_ID *id;
@@ -62,6 +90,12 @@ void checkForwardReference(void) {
   }
 }
 
+void setDefaultSpecifier(A_SPECIFIER *p) {
+  A_TYPE *t;
+  if (p->type == NIL) p->type = int_type;
+  if (p->stor == S_NULL) p->stor = S_AUTO;
+}
+
 // concat declarator list id1 and id2
 A_ID *linkDeclaratorList(A_ID *id1, A_ID *id2) {
   A_ID *m;
@@ -75,7 +109,119 @@ A_ID *linkDeclaratorList(A_ID *id1, A_ID *id2) {
   return id1;
 }
 
-// void initialize() {
+A_ID *getIdentifierDeclared(char *);
+A_TYPE *getTypeOfStructOrEnumRefIdentifier(T_KIND, char *, ID_KIND);
+A_ID *setDeclaratorInit(A_ID *, A_NODE *);
+A_ID *setDeclaratorKind(A_ID *, ID_KIND);
+A_ID *setDeclaratorType(A_ID *, A_TYPE *);
+
+// append element type to symbol table (A_ID)
+A_ID *setDeclaratorElementType(A_ID *id, A_TYPE *t) {
+  A_TYPE *tt;
+
+  if (id->type == NIL)
+    id->type = t;
+  else {
+    tt = id->type;
+    while (tt->element_type) tt = tt->element_type;
+    tt->element_type = t;
+  }
+
+  return id;
+}
+
+A_ID *setDeclaratorTypeAndKind(A_ID *, A_TYPE *, ID_KIND);
+A_ID *setDeclaratorListSpecifier(A_ID *, A_SPECIFIER *);
+
+A_ID *setFunctionDeclaratorSpecifier(A_ID *id, A_SPECIFIER *p) {
+  A_ID *a;
+
+  // error if storage class specified?
+  if (p->stor) syntax_error(25, NULL);
+
+  setDefaultSpecifier(p);
+
+  // check if declarator type is function
+  if (id->type->kind != T_FUNC) {
+    syntax_error(21, NULL);
+    return id;
+  } else {
+    id = setDeclaratorElementType(id, p->type);
+    id->kind = ID_FUNC;
+  }
+
+  a = searchIdentifierAtCurrentLevel(id->name, id->prev);
+  if (a && (a->kind != ID_FUNC || a->type->expr))
+    // there is same name identifier and that is not prototype
+    syntax_error(12, id->name);
+  else if (a) {
+    // if that identifier is prototype, check return type and parameters
+    if (isNotSameFormalParameters(a->type->field, id->type->field))
+      syntax_error(22, id->name);
+    if (isNotSameType(a->type->element_type, id->type->element_type))
+      syntax_error(26, a->name);
+  }
+
+  a = id->type->field;
+  while (a) {
+    if (strlen(a->name))
+      current_id = a;
+    else if (a->type)
+      syntax_error(23, NULL);
+
+    a = a->link;
+  }
+
+  return id;
+}
+
+A_ID *setFunctionDeclaratorBody(A_ID *id, A_NODE *n) {
+  id->type->expr = n;
+  return id;
+}
+
+A_ID *setParameterDeclaratorSpecifier(A_ID *, A_SPECIFIER *);
+A_ID *setStructDeclaratorListSpecifier(A_ID *, A_TYPE *);
+A_TYPE *setTypeNameSpecifier(A_TYPE *, A_SPECIFIER *);
+A_TYPE *setTypeElementType(A_TYPE *, A_TYPE *);
+A_TYPE *setTypeField(A_TYPE *, A_ID *);
+A_TYPE *setTypeExpr(A_TYPE *, A_NODE *);
+A_TYPE *setTypeAndKindOfDeclarator(A_TYPE *, ID_KIND, A_ID *);
+A_TYPE *setTypeStructOrEnumIdentifier(T_KIND, char *, ID_KIND);
+
+// return TRUE when parameter type of prototype and definition conflicts
+BOOLEAN isNotSameFormalParameters(A_ID *prototype, A_ID *definition) {
+  if (prototype == NIL) return FALSE;
+  while (prototype) {
+    if (definition == NIL || isNotSameType(prototype->type, definition->type))
+      return TRUE;
+    prototype = prototype->link;
+    definition = definition->link;
+  }
+
+  if (definition)
+    return TRUE;
+  else
+    return FALSE;
+}
+
+// if t1 or t2 are
+BOOLEAN isNotSameType(A_TYPE *t1, A_TYPE *t2) {
+  if (isPointerOrArrayType(t1) && isPointerOrArrayType(t2))
+    return t1->expr != t2->expr
+           || isNotSameType(t1->element_type, t2->element_type);
+  else
+    return t1 != t2;
+}
+
+BOOLEAN isPointerOrArrayType(A_TYPE *t) {
+  if (t && (t->kind == T_POINTER || t->kind == T_ARRAY))
+    return TRUE;
+  else
+    return FALSE;
+}
+
+void initialize(void);  // {
 //   // set primitive data types
 //   int_type = setTypeAndKindOfDeclarator();
 // }

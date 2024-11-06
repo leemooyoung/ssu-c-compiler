@@ -96,21 +96,23 @@ declaration_list
     ;
 declaration
     : declaration_specifiers init_declarator_list_opt SEMICOLON
+    { $$ = setDeclaratorListSpecifier($2, $1); }
     ;
 declaration_specifiers
-    : type_specifier
-    | storage_class_specifier
-    | type_specifier declaration_specifiers
+    : type_specifier { $$ = makeSpecifier($1, 0); }
+    | storage_class_specifier { $$ = makeSpecifier(0, $1); }
+    | type_specifier declaration_specifiers { $$ = updateSpecifier($2, $1, 0); }
     | storage_class_specifier declaration_specifiers
+    { $$ = updateSpecifier($2, 0, $1); }
     ;
 storage_class_specifier
-    : AUTO_SYM
-    | STATIC_SYM
-    | TYPEDEF_SYM
+    : AUTO_SYM { $$ = S_AUTO; }
+    | STATIC_SYM { $$ = S_STATIC; }
+    | TYPEDEF_SYM { $$ = S_TYPEDEF; }
     ;
 init_declarator_list_opt
-    :
-    | init_declarator_list
+    : { $$ = NIL; }
+    | init_declarator_list { $$ = $1; }
     ;
 init_declarator_list
     : init_declarator

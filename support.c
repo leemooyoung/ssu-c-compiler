@@ -72,7 +72,28 @@ A_ID *searchIdentifierAtCurrentLevel(char *s, A_ID *id) {
   return id;
 }
 
-A_SPECIFIER *updateSpecifier(A_SPECIFIER *, A_TYPE *, S_KIND);
+// merge and update declaration_specifier
+// p must not be NULL
+A_SPECIFIER *updateSpecifier(A_SPECIFIER *p, A_TYPE *t, S_KIND s) {
+  if (t != NULL)
+    if (p->type)
+      if (p->type == t)
+        ;
+      else
+        syntax_error(24, NULL);
+    else
+      p->type = t;
+
+  if (s) {
+    if (p->stor)
+      if (s == p->stor)
+        ;
+      else
+        syntax_error(24, NULL);
+    else
+      p->stor = s;
+  }
+}
 
 // check if references configured well when end of scope
 void checkForwardReference(void) {
@@ -131,7 +152,35 @@ A_ID *setDeclaratorElementType(A_ID *id, A_TYPE *t) {
 }
 
 A_ID *setDeclaratorTypeAndKind(A_ID *, A_TYPE *, ID_KIND);
-A_ID *setDeclaratorListSpecifier(A_ID *, A_SPECIFIER *);
+
+A_ID *setDeclaratorListSpecifier(A_ID *id, A_SPECIFIER *p) {
+  A_ID *a;
+  setDefaultSpecifier(p);
+
+  a = id;
+  while (a) {
+    // check duplicate declaration
+    if (strlen(a->name) && searchIdentifierAtCurrentLevel(a->name, a->prev))
+      syntax_error(12, a->name);
+
+    // set type of identifier
+    a = setDeclaratorElementType(a, p->type);
+    if (p->stor == S_TYPEDEF)
+      a->kind = ID_TYPE;
+    else if (a->type->kind == T_FUNC)
+      a->kind = ID_FUNC;
+    else
+      a->kind = ID_VAR;
+
+    a->specifier = p->stor;
+    // p have default value from setDefaultSpecifier
+    // if (a->specifier == S_NULL) a->specifier = S_AUTO;
+
+    a = a->link;
+  }
+
+  return id;
+}
 
 A_ID *setFunctionDeclaratorSpecifier(A_ID *id, A_SPECIFIER *p) {
   A_ID *a;

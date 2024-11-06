@@ -6,6 +6,7 @@
 #include "support.h"
 
 extern int line_no;
+extern A_NODE *root;
 extern A_ID *current_id;
 extern int current_level;
 int yyerror();
@@ -70,15 +71,16 @@ CASE_SYM
 DEFAULT_SYM
 %%
 program
-    : translation_unit { checkForwardReference(); }
+    : translation_unit
+    { root = makeNode(N_PROGRAM, NIL, $1, NIL); checkForwardReference(); }
     ;
 translation_unit
-    : external_declaration
-    | translation_unit external_declaration
+    : external_declaration { $$ = $1; }
+    | translation_unit external_declaration { $$ = linkDeclaratorList($1, $2); }
     ;
 external_declaration
-    : function_definition
-    | declaration
+    : function_definition { $$ = $1; }
+    | declaration { $$ = $1; }
     ;
 function_definition
     : declaration_specifiers declarator compound_statement

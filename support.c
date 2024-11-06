@@ -8,10 +8,24 @@
 
 extern char *yytext;
 A_TYPE *int_type, *char_type, *void_type, *float_type, *string_type;
+A_NODE *root;
 A_ID *current_id = NIL;
 int syntax_err = 0;
 int line_no = 1;
 int current_level = 0;
+
+A_NODE *makeNode(NODE_NAME n, A_NODE *a, A_NODE *b, A_NODE *c) {
+  A_NODE *m;
+  m = (A_NODE *)malloc(sizeof(A_NODE));
+  m->name = n;
+  m->llink = a;
+  m->clink = b;
+  m->rlink = c;
+  m->type = NIL;
+  m->line = line_no;
+  m->value = 0;
+  return m;
+}
 
 // create symbol table
 A_ID *makeIdentifier(char *s) {
@@ -47,6 +61,24 @@ void checkForwardReference() {
     id = id->prev;
   }
 }
+
+// concat declarator list id1 and id2
+A_ID *linkDeclaratorList(A_ID *id1, A_ID *id2) {
+  A_ID *m;
+
+  if (id1 == NIL) return id2;
+
+  m = id1;
+  while (m->link) m = m->link;
+  m->link = id2;
+
+  return id1;
+}
+
+// void initialize() {
+//   // set primitive data types
+//   int_type = setTypeAndKindOfDeclarator();
+// }
 
 void syntax_error(int i, char *s) {
   syntax_err++;

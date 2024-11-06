@@ -192,7 +192,16 @@ A_ID *setDeclaratorInit(A_ID *id, A_NODE *n) {
   return id;
 }
 
-A_ID *setDeclaratorKind(A_ID *, ID_KIND);
+A_ID *setDeclaratorKind(A_ID *id, ID_KIND k) {
+  A_ID *a;
+
+  a = searchIdentifierAtCurrentLevel(id->name, id->prev);
+  if (a) syntax_error(12, id->name);
+
+  id->kind = k;
+  return id;
+}
+
 A_ID *setDeclaratorType(A_ID *, A_TYPE *);
 
 // append element type to symbol table (A_ID)

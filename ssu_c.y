@@ -172,17 +172,24 @@ struct_declarator
     : declarator { $$ = $1; }
     ;
 enum_type_specifier
-    : ENUM_SYM IDENTIFIER { $$ = makeIdentifier($2); } LR enumerator_list RR
-    | ENUM_SYM LR enumerator_list RR
+    : ENUM_SYM IDENTIFIER
+    { $$ = setTypeStructOrEnumIdentifier(T_ENUM, $2, ID_ENUM); }
+    LR enumerator_list RR { $$ = setTypeField($3, $5); }
+    | ENUM_SYM { $$ = makeType(T_ENUM); }
+    LR enumerator_list RR { $$ = setTypeField($2, $4); }
     | ENUM_SYM IDENTIFIER
+    { $$ = getTypeOfStructOrEnumRefIdentifier(T_ENUM, $2, ID_ENUM); }
     ;
 enumerator_list
-    : enumerator
-    | enumerator_list COMMA enumerator
+    : enumerator { $$ = $1; }
+    | enumerator_list COMMA enumerator { $$ = linkDeclaratorList($1, $3); }
     ;
 enumerator
-    : IDENTIFIER { $$ = makeIdentifier($1); }
-    | IDENTIFIER { $$ = makeIdentifier($1); } ASSIGN constant_expression
+    : IDENTIFIER
+    { $$ = setDeclaratorKind(makeIdentifier($1), ID_ENUM_LITERAL); }
+    | IDENTIFIER
+    { $$ = setDeclaratorKind(makeIdentifier($1), ID_ENUM_LITERAL); }
+    ASSIGN constant_expression { $$ = setDeclaratorInit($2, $4); }
     ;
 declarator
     : pointer direct_declarator

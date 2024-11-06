@@ -133,35 +133,43 @@ initializer_list
     { $$ = makeNodeList(N_INIT_LIST, $1, $3); }
     ;
 type_specifier
-    : struct_type_specifier
-    | enum_type_specifier
-    | TYPE_IDENTIFIER
+    : struct_type_specifier { $$ = $1; }
+    | enum_type_specifier { $$ = $1; }
+    | TYPE_IDENTIFIER { $$ = $1; }
     ;
 struct_type_specifier
-    : struct_or_union IDENTIFIER { $$ = makeIdentifier($2); }
+    : struct_or_union IDENTIFIER
+    { $$ = setTypeStructOrEnumIdentifier($1, $2, ID_STRUCT); }
     LR { $$ = current_id; current_level++; } struct_declaration_list RR
-    { checkForwardReference(); current_level--; current_id = $5; }
-    | struct_or_union LR { $$ = current_id; current_level++; }
-    struct_declaration_list RR { current_level--; current_id = $3; }
+    { checkForwardReference(); $$ = setTypeField($3, $6);
+    current_level--; current_id = $5; }
+    | struct_or_union { $$ = makeType($1); } LR
+    { $$ = current_id; current_level++; } struct_declaration_list RR
+    { checkForwardReference(); $$ = setTypeField($2, $5);
+    current_level--; current_id = $3; }
     | struct_or_union IDENTIFIER
+    { $$ = getTypeOfStructOrEnumRefIdentifier($1, $2, ID_STRUCT); }
     ;
 struct_or_union
-    : STRUCT_SYM
-    | UNION_SYM
+    : STRUCT_SYM { $$ = T_STRUCT; }
+    | UNION_SYM { $$ = T_UNION; }
     ;
 struct_declaration_list
-    : struct_declaration
+    : struct_declaration { $$ = $1; }
     | struct_declaration_list struct_declaration
+    { $$ = linkDeclaratorList($1, $2); }
     ;
 struct_declaration
     : type_specifier struct_declarator_list SEMICOLON
+    { $$ = setStructDeclaratorListSpecifier($2, $1); }
     ;
 struct_declarator_list
-    : struct_declarator
+    : struct_declarator { $$ = $1; }
     | struct_declarator_list COMMA struct_declarator
+    { $$ = linkDeclaratorList($1, $3); }
     ;
 struct_declarator
-    : declarator
+    : declarator { $$ = $1; }
     ;
 enum_type_specifier
     : ENUM_SYM IDENTIFIER { $$ = makeIdentifier($2); } LR enumerator_list RR

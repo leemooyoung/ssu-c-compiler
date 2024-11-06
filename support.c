@@ -63,7 +63,23 @@ A_ID *makeIdentifier(char *s) {
 }
 
 A_ID *makeDummyIdentifier(void);
-A_TYPE *makeType(T_KIND);
+
+A_TYPE *makeType(T_KIND k) {
+  A_TYPE *t;
+
+  t = (A_TYPE *)malloc(sizeof(A_TYPE));
+  t->kind = k;
+  t->size = 0;
+  t->local_var_size = 0;
+  t->element_type = NIL;
+  t->field = NIL;
+  t->expr = NIL;
+  t->check = FALSE;
+  t->prt = FALSE;
+  t->line = line_no;
+
+  return t;
+}
 
 A_SPECIFIER *makeSpecifier(A_TYPE *t, S_KIND s) {
   A_SPECIFIER *p;
@@ -74,7 +90,14 @@ A_SPECIFIER *makeSpecifier(A_TYPE *t, S_KIND s) {
   return p;
 }
 
-A_ID *searchIdentifier(char *, A_ID *);
+A_ID *searchIdentifier(char *s, A_ID *id) {
+  while (id) {
+    if (strcmp(id->name, s) == 0) break;
+    id = id->prev;
+  }
+
+  return id;
+}
 
 A_ID *searchIdentifierAtCurrentLevel(char *s, A_ID *id) {
   while (id) {
@@ -144,7 +167,25 @@ A_ID *linkDeclaratorList(A_ID *id1, A_ID *id2) {
 }
 
 A_ID *getIdentifierDeclared(char *);
-A_TYPE *getTypeOfStructOrEnumRefIdentifier(T_KIND, char *, ID_KIND);
+
+A_TYPE *getTypeOfStructOrEnumRefIdentifier(T_KIND k, char *s, ID_KIND kk) {
+  A_TYPE *t;
+  A_ID *id;
+
+  id = searchIdentifier(s, current_id);
+  if (id)
+    if (id->kind == kk && id->type->kind == k)
+      return id->type;
+    else
+      syntax_error(11, s);
+
+  t = makeType(k);
+  id = makeIdentifier(s);
+  id->kind = kk;
+  id->type = t;
+
+  return t;
+}
 
 A_ID *setDeclaratorInit(A_ID *id, A_NODE *n) {
   id->init = n;
@@ -248,13 +289,62 @@ A_ID *setFunctionDeclaratorBody(A_ID *id, A_NODE *n) {
 }
 
 A_ID *setParameterDeclaratorSpecifier(A_ID *, A_SPECIFIER *);
-A_ID *setStructDeclaratorListSpecifier(A_ID *, A_TYPE *);
+
+A_ID *setStructDeclaratorListSpecifier(A_ID *id, A_TYPE *t) {
+  A_ID *a;
+
+  a = id;
+  while (a) {
+    if (searchIdentifierAtCurrentLevel(a->name, a->prev))
+      syntax_error(12, a->name);
+
+    a = setDeclaratorElementType(a, t);
+    a->kind = ID_FIELD;
+    a = a->link;
+  }
+
+  return id;
+}
+
 A_TYPE *setTypeNameSpecifier(A_TYPE *, A_SPECIFIER *);
 A_TYPE *setTypeElementType(A_TYPE *, A_TYPE *);
-A_TYPE *setTypeField(A_TYPE *, A_ID *);
+
+A_TYPE *setTypeField(A_TYPE *t, A_ID *n) {
+  t->field = n;
+  return t;
+}
+
 A_TYPE *setTypeExpr(A_TYPE *, A_NODE *);
 A_TYPE *setTypeAndKindOfDeclarator(A_TYPE *, ID_KIND, A_ID *);
-A_TYPE *setTypeStructOrEnumIdentifier(T_KIND, char *, ID_KIND);
+
+// Find previously used same identifier and if there isn't, create a symbol
+// table for given identifier. The main difference between getTypeOfStruct~ is
+// that it uses searchIdentifierAtCurrentLevel, so identifier declared outside
+// can be redeclared
+A_TYPE *setTypeStructOrEnumIdentifier(T_KIND k, char *s, ID_KIND kk) {
+  A_TYPE *t;
+  A_ID *id, *a;
+
+  // check duplicate declaration at current level
+  a = searchIdentifierAtCurrentLevel(s, current_id);
+  if (a)
+    if (a->kind == kk && a->type->kind == k)
+      if (a->type->field)
+        syntax_error(12, s);
+      else
+        return a->type;  // is free(s) needed?
+    else
+      // type of identifier declared before and type of current identifier are
+      // different
+      syntax_error(12, s);
+
+  id = makeIdentifier(s);
+  t = makeType(k);
+  id->type = t;
+  id->kind = kk;
+
+  return t;
+}
 
 // return TRUE when parameter type of prototype and definition conflicts
 BOOLEAN isNotSameFormalParameters(A_ID *prototype, A_ID *definition) {

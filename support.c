@@ -181,7 +181,14 @@ A_ID *linkDeclaratorList(A_ID *id1, A_ID *id2) {
   return id1;
 }
 
-A_ID *getIdentifierDeclared(char *);
+A_ID *getIdentifierDeclared(char *s) {
+  A_ID *id;
+
+  id = searchIdentifier(s, current_id);
+  if (id == NIL) syntax_error(13, s);
+
+  return id;
+}
 
 A_TYPE *getTypeOfStructOrEnumRefIdentifier(T_KIND k, char *s, ID_KIND kk) {
   A_TYPE *t;
@@ -346,7 +353,15 @@ A_ID *setStructDeclaratorListSpecifier(A_ID *id, A_TYPE *t) {
   return id;
 }
 
-A_TYPE *setTypeNameSpecifier(A_TYPE *, A_SPECIFIER *);
+A_TYPE *setTypeNameSpecifier(A_TYPE *t, A_SPECIFIER *p) {
+  // can't use storage class specifier in cast operation
+  if (p->stor) syntax_error(20, NULL);
+
+  setDefaultSpecifier(p);
+  t = setTypeElementType(t, p->type);
+
+  return t;
+}
 
 // append s to last element type of t
 A_TYPE *setTypeElementType(A_TYPE *t, A_TYPE *s) {

@@ -87,12 +87,12 @@ function_definition
     compound_statement { $$ = setFunctionDeclaratorBody($2, $3); }
     ;
 declaration_list_opt
-    :
-    | declaration_list
+    : { $$ = NIL; }
+    | declaration_list { $$ = $1; }
     ;
 declaration_list
-    : declaration
-    | declaration_list declaration
+    : declaration { $$ = $1; }
+    | declaration_list declaration { $$ = linkDeclaratorList($1, $2); }
     ;
 declaration
     : declaration_specifiers init_declarator_list_opt SEMICOLON
@@ -297,8 +297,8 @@ for_expression
     : expression_opt SEMICOLON expression_opt SEMICOLON expression_opt
     ;
 expression_opt
-    :
-    | expression
+    : { $$ = NIL; }
+    | expression { $$ = $1; }
     ;
 jump_statement
     : RETURN_SYM expression_opt SEMICOLON
@@ -306,111 +306,128 @@ jump_statement
     | BREAK_SYM SEMICOLON
     ;
 arg_expression_list_opt
-    :
-    | arg_expression_list
+    : { $$ = makeNode(N_ARG_LIST_NIL, 0, 0, 0); }
+    | arg_expression_list { $$ = $1; }
     ;
 arg_expression_list
     : assignment_expression
+    { $$ = makeNode(N_ARG_LIST, $1, 0, makeNode(N_ARG_LIST_NIL, 0, 0, 0)); }
     | arg_expression_list COMMA assignment_expression
+    { $$ = makeNode(N_ARG_LIST, $1, 0, $3); }
     ;
 constant_expression_opt
-    :
-    | constant_expression
+    : { $$ = NIL; }
+    | constant_expression { $$ = $1; }
     ;
 constant_expression
-    : expression
+    : conditional_expression { $$ = $1; }
     ;
 expression
-    : comma_expression
+    : comma_expression { $$ = $1; }
     ;
 comma_expression
-    : assignment_expression
+    : assignment_expression { $$ = $1; }
     ;
 assignment_expression
-    : conditional_expression
+    : conditional_expression { $$ = $1; }
     | unary_expression ASSIGN assignment_expression
+    { $$ = makeNode(N_EXP_ASSIGN, $1, 0, $3); }
     ;
 conditional_expression
-    : logical_or_expression
+    : logical_or_expression { $$ = $1; }
     ;
 logical_or_expression
-    : logical_and_expression
+    : logical_and_expression { $$ = $1; }
     | logical_or_expression BARBAR logical_and_expression
+    { $$ = makeNode(N_EXP_OR, $1, 0, $3); }
     ;
 logical_and_expression
-    : bitwise_or_expression
+    : bitwise_or_expression { $$ = $1; }
     | logical_and_expression AMPAMP bitwise_or_expression
+    { $$ = makeNode(N_EXP_AND, $1, 0, $3); }
     ;
 bitwise_or_expression
-    : bitwise_xor_expression
+    : bitwise_xor_expression { $$ = $1; }
     ;
 bitwise_xor_expression
-    : bitwise_and_expression
+    : bitwise_and_expression { $$ = $1; }
     ;
 bitwise_and_expression
-    : equality_expression
+    : equality_expression { $$ = $1; }
     ;
 equality_expression
-    : relational_expression
+    : relational_expression { $$ = $1; }
     | equality_expression EQL relational_expression
+    { $$ = makeNode(N_EXP_EQL, $1, 0, $3); }
     | equality_expression NEQ relational_expression
+    { $$ = makeNode(N_EXP_NEQ, $1, 0, $3); }
     ;
 relational_expression
-    : shift_expression
+    : shift_expression { $$ = $1; }
     | relational_expression LSS shift_expression
+    { $$ = makeNode(N_EXP_LSS, $1, 0, $3); }
     | relational_expression GTR shift_expression
+    { $$ = makeNode(N_EXP_GTR, $1, 0, $3); }
     | relational_expression LEQ shift_expression
+    { $$ = makeNode(N_EXP_LEQ, $1, 0, $3); }
     | relational_expression GEQ shift_expression
+    { $$ = makeNode(N_EXP_GEQ, $1, 0, $3); }
     ;
 shift_expression
-    : additive_expression
+    : additive_expression { $$ = $1; }
     ;
 additive_expression
-    : multiplicative_expression
-    | additive_expression PLUS multiplicative_expression
-    | additive_expression MINUS multiplicative_expression
+    : multiplicative_expression { $$ = $1; }
+    | additive_expression PLUS multiplicative_expression { $$ = makeNode(N_EXP_ADD, $1, 0, $3); }
+    | additive_expression MINUS multiplicative_expression { $$ = makeNode(N_EXP_SUB, $1, 0, $3); }
     ;
 multiplicative_expression
-    : cast_expression
-    | multiplicative_expression STAR cast_expression
-    | multiplicative_expression SLASH cast_expression
-    | multiplicative_expression PERCENT cast_expression
+    : cast_expression { $$ = $1; }
+    | multiplicative_expression STAR cast_expression { $$ = makeNode(N_EXP_MUL, $1, 0, $3); }
+    | multiplicative_expression SLASH cast_expression { $$ = makeNode(N_EXP_DIV, $1, 0, $3); }
+    | multiplicative_expression PERCENT cast_expression { $$ = makeNode(N_EXP_MOD, $1, 0, $3); }
     ;
 cast_expression
-    : unary_expression
-    | LP type_name RP cast_expression
+    : unary_expression { $$ = $1; }
+    | LP type_name RP cast_expression { $$ = makeNode(N_EXP_CAST, $2, 0, $4); }
     ;
 unary_expression
-    : postfix_expression
-    | PLUSPLUS unary_expression
-    | MINUSMINUS unary_expression
-    | AMP cast_expression
-    | STAR cast_expression
-    | EXCL cast_expression
-    | MINUS cast_expression
-    | PLUS cast_expression
-    | SIZEOF_SYM unary_expression
-    | SIZEOF_SYM LP type_name RP
+    : postfix_expression { $$ = $1; }
+    | PLUSPLUS unary_expression { $$ = makeNode(N_EXP_PRE_INC, 0, $2, 0); }
+    | MINUSMINUS unary_expression { $$ = makeNode(N_EXP_PRE_DEC, 0, $2, 0); }
+    | AMP cast_expression { $$ = makeNode(N_EXP_AMP, 0, $2, 0); }
+    | STAR cast_expression { $$ = makeNode(N_EXP_STAR, 0, $2, 0); }
+    | EXCL cast_expression { $$ = makeNode(N_EXP_NOT, 0, $2, 0); }
+    | MINUS cast_expression { $$ = makeNode(N_EXP_MINUS, 0, $2, 0); }
+    | PLUS cast_expression { $$ = $1; }
+    | SIZEOF_SYM unary_expression { $$ = makeNode(N_EXP_SIZE_EXP, 0, $2, 0); }
+    | SIZEOF_SYM LP type_name RP { $$ = makeNode(N_EXP_SIZE_TYPE, 0, $3, 0); }
     ;
 postfix_expression
-    : primary_expression
+    : primary_expression { $$ = $1; }
     | postfix_expression LB expression RB
-    | postfix_expression LP arg_expression_list_opt RP
+    { $$ = makeNode(N_EXP_ARRAY, $1, 0, $3); }
+    | postfix_expression LP arg_expression_list_opt RP 
+    { $$ = makeNode(N_EXP_FUNCTION_CALL, $1, 0, $3); }
     | postfix_expression PERIOD IDENTIFIER
+    { $$ = makeNode(N_EXP_STRUCT, $1, 0, $3); }
     | postfix_expression ARROW IDENTIFIER
-    | postfix_expression PLUSPLUS
-    | postfix_expression MINUSMINUS
+    { $$ = makeNode(N_EXP_ARROW, $1, 0, $3); }
+    | postfix_expression PLUSPLUS { $$ = makeNode(N_EXP_POST_INC, 0, $1, 0); }
+    | postfix_expression MINUSMINUS { $$ = makeNode(N_EXP_POST_DEC, 0, $1, 0); }
     ;
 primary_expression
     : IDENTIFIER
-    | INTEGER_CONSTANT
-    | FLOAT_CONSTANT
-    | CHARACTER_CONSTANT
-    | STRING_LITERAL
-    | LP expression RP
+    { $$ = makeNode(N_EXP_IDENT, 0, (A_NODE *)getIdentifierDeclared($1), 0); }
+    | INTEGER_CONSTANT { $$ = makeNode(N_EXP_INT_CONST, 0, $1, 0); }
+    | FLOAT_CONSTANT { $$ = makeNode(N_EXP_FLOAT_CONST, 0, $1, 0); }
+    | CHARACTER_CONSTANT { $$ = makeNode(N_EXP_CHAR_CONST, 0, $1, 0); }
+    | STRING_LITERAL { $$ = makeNode(N_EXP_STRING_LITERAL, 0, $1, 0); }
+    | LP expression RP { $$ = $2; }
     ;
 type_name
     : declaration_specifiers abstract_declarator_opt
+    { $$ = setTypeNameSpecifier($2, $1); }
     ;
 %%
 

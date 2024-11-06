@@ -28,7 +28,20 @@ A_NODE *makeNode(NODE_NAME n, A_NODE *a, A_NODE *b, A_NODE *c) {
   return m;
 }
 
-A_NODE *makeNodeList(NODE_NAME, A_NODE *, A_NODE *);
+// append b to a
+A_NODE *makeNodeList(NODE_NAME n, A_NODE *a, A_NODE *b) {
+  A_NODE *m, *k;
+
+  k = a;
+  while (k->rlink) k = k->rlink;
+
+  m = makeNode(k->name, NIL, NIL, NIL);
+  k->name = n;
+  k->llink = b;
+  k->rlink = m;
+
+  return a;
+}
 
 // create symbol table
 A_ID *makeIdentifier(char *s) {
@@ -132,7 +145,12 @@ A_ID *linkDeclaratorList(A_ID *id1, A_ID *id2) {
 
 A_ID *getIdentifierDeclared(char *);
 A_TYPE *getTypeOfStructOrEnumRefIdentifier(T_KIND, char *, ID_KIND);
-A_ID *setDeclaratorInit(A_ID *, A_NODE *);
+
+A_ID *setDeclaratorInit(A_ID *id, A_NODE *n) {
+  id->init = n;
+  return id;
+}
+
 A_ID *setDeclaratorKind(A_ID *, ID_KIND);
 A_ID *setDeclaratorType(A_ID *, A_TYPE *);
 

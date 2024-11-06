@@ -115,19 +115,22 @@ init_declarator_list_opt
     | init_declarator_list { $$ = $1; }
     ;
 init_declarator_list
-    : init_declarator
+    : init_declarator { $$ = $1; }
     | init_declarator_list COMMA init_declarator
+    { $$ = linkDeclaratorList($1, $3); }
     ;
 init_declarator
-    : declarator
-    | declarator ASSIGN initializer
+    : declarator { $$ = $1; }
+    | declarator ASSIGN initializer { $$ = setDeclaratorInit($1, $3); }
 initializer
-    : constant_expression
-    | LR initializer_list RR
+    : constant_expression { $$ = makeNode(N_INIT_LIST_ONE, 0, $1, 0); }
+    | LR initializer_list RR { $$ = $2; }
     ;
 initializer_list
     : initializer
+    { $$ = makeNode(N_INIT_LIST, $1, 0, makeNode(N_INIT_LIST_NIL, 0, 0, 0)); }
     | initializer_list COMMA initializer
+    { $$ = makeNodeList(N_INIT_LIST, $1, $3); }
     ;
 type_specifier
     : struct_type_specifier

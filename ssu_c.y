@@ -192,52 +192,67 @@ enumerator
     ASSIGN constant_expression { $$ = setDeclaratorInit($2, $4); }
     ;
 declarator
-    : pointer direct_declarator
-    | direct_declarator
+    : pointer direct_declarator { $$ = setDeclaratorElementType($2, $1); }
+    | direct_declarator { $$ = $1; }
     ;
 pointer
-    : STAR
-    | STAR pointer
+    : STAR { $$ = makeType(T_POINTER); }
+    | STAR pointer { $$ = setTypeElementType($2, makeType(T_POINTER)); }
     ;
 direct_declarator
     : IDENTIFIER { $$ = makeIdentifier($1); }
-    | LP declarator RP
+    | LP declarator RP { $$ = $2; }
     | direct_declarator LB constant_expression_opt RB
+    { $$ = setDeclaratorElementType($1, setTypeExpr(makeType(T_ARRAY), $3)); }
     | direct_declarator LP { $$ = current_id; current_level++; }
     parameter_type_list_opt RP
-    { checkForwardReference(); current_level--; current_id = $3; }
+    { checkForwardReference(); current_level--; current_id = $3;
+    $$ = setDeclaratorElementType($1, setTypeField(makeType(T_FUNC), $4)); }
     ;
 parameter_type_list_opt
-    :
-    | parameter_type_list
+    : { $$ = NIL; }
+    | parameter_type_list { $$ = $1; }
     ;
 parameter_type_list
-    : parameter_list
+    : parameter_list { $$ = $1; }
     | parameter_list COMMA DOTDOTDOT
+    { $$ = linkDeclaratorList(
+        $1,
+        setDeclaratorKind(makeDummyIdentifier(), ID_PARAM)
+    ); }
     ;
 parameter_list
-    : parameter_declaration
+    : parameter_declaration { $$ = $1; }
     | parameter_list COMMA parameter_declaration
+    { $$ = linkDeclaratorList($1, $3); }
     ;
 parameter_declaration
     : declaration_specifiers declarator
+    { $$ = setParameterDeclaratorSpecifier($2, $1); }
     | declaration_specifiers abstract_declarator_opt
+    { $$ = setParameterDeclaratorSpecifier(
+        setDeclaratorType(makeDummyIdentifier(), $2),
+        $1
+    ); }
     ;
 abstract_declarator_opt
-    :
-    | abstract_declarator
+    : { $$ = NIL; }
+    | abstract_declarator { $$ = $1; }
     ;
+// TODO: check abstract declarator pointer type
 abstract_declarator
-    : direct_abstract_declarator
-    | pointer
-    | pointer direct_abstract_declarator
+    : direct_abstract_declarator { $$ = $1; }
+    | pointer { $$ = $1; }
+    | pointer direct_abstract_declarator { $$ = setTypeElementType($2, $1); }
     ;
 direct_abstract_declarator
-    : LP abstract_declarator RP
-    | LB constant_expression_opt RB
+    : LP abstract_declarator RP { $$ = $2; }
+    | LB constant_expression_opt RB { $$ = setTypeExpr(makeType(T_ARRAY), $2); }
     | direct_abstract_declarator LB constant_expression_opt RB
-    | LP parameter_type_list_opt RP
+    { $$ = setTypeElementType($1, setTypeExpr(makeType(T_ARRAY), $3)); }
+    | LP parameter_type_list_opt RP { $$ = setTypeExpr(makeType(T_FUNC), $2); }
     | direct_abstract_declarator LP parameter_type_list_opt RP
+    { $$ = setTypeElementType($1, setTypeExpr(makeType(T_FUNC), $3)); }
     ;
 statement_list_opt
     :

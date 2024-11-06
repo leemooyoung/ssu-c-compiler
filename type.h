@@ -100,7 +100,7 @@ typedef enum {
   ID_NULL,
   ID_VAR,
   ID_FUNC,
-  ID_PARM,
+  ID_PARAM,
   ID_FIELD,
   ID_TYPE,
   ID_ENUM,

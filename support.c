@@ -62,7 +62,22 @@ A_ID *makeIdentifier(char *s) {
   return id;
 }
 
-A_ID *makeDummyIdentifier(void);
+A_ID *makeDummyIdentifier(void) {
+  A_ID *id;
+  id = (A_ID *)malloc(sizeof(A_ID));
+  id->name = "";
+  id->kind = 0;
+  id->specifier = 0;
+  id->level = current_level;
+  id->address = 0;
+  id->init = NIL;
+  id->type = NIL;
+  id->link = NIL;
+  id->line = line_no;
+  id->value = 0;
+  id->prev = 0;
+  return id;
+}
 
 A_TYPE *makeType(T_KIND k) {
   A_TYPE *t;
@@ -202,7 +217,10 @@ A_ID *setDeclaratorKind(A_ID *id, ID_KIND k) {
   return id;
 }
 
-A_ID *setDeclaratorType(A_ID *, A_TYPE *);
+A_ID *setDeclaratorType(A_ID *id, A_TYPE *t) {
+  id->type = t;
+  return id;
+}
 
 // append element type to symbol table (A_ID)
 A_ID *setDeclaratorElementType(A_ID *id, A_TYPE *t) {
@@ -297,7 +315,20 @@ A_ID *setFunctionDeclaratorBody(A_ID *id, A_NODE *n) {
   return id;
 }
 
-A_ID *setParameterDeclaratorSpecifier(A_ID *, A_SPECIFIER *);
+A_ID *setParameterDeclaratorSpecifier(A_ID *id, A_SPECIFIER *p) {
+  // check duplicate declaration
+  if (searchIdentifierAtCurrentLevel(id->name, id->prev))
+    syntax_error(12, id->name);
+
+  // function parameter can not have storage class and be void type
+  if (p->stor || p->type == void_type) syntax_error(14, NULL);
+
+  setDefaultSpecifier(p);
+  id = setDeclaratorElementType(id, p->type);
+  id->kind = ID_PARAM;
+
+  return id;
+}
 
 A_ID *setStructDeclaratorListSpecifier(A_ID *id, A_TYPE *t) {
   A_ID *a;
@@ -316,14 +347,29 @@ A_ID *setStructDeclaratorListSpecifier(A_ID *id, A_TYPE *t) {
 }
 
 A_TYPE *setTypeNameSpecifier(A_TYPE *, A_SPECIFIER *);
-A_TYPE *setTypeElementType(A_TYPE *, A_TYPE *);
+
+// append s to last element type of t
+A_TYPE *setTypeElementType(A_TYPE *t, A_TYPE *s) {
+  A_TYPE *q;
+  if (t == NIL) return s;
+
+  q = t;
+  while (q->element_type) q = q->element_type;
+  q->element_type = s;
+
+  return t;
+}
 
 A_TYPE *setTypeField(A_TYPE *t, A_ID *n) {
   t->field = n;
   return t;
 }
 
-A_TYPE *setTypeExpr(A_TYPE *, A_NODE *);
+A_TYPE *setTypeExpr(A_TYPE *t, A_NODE *n) {
+  t->expr = n;
+  return t;
+}
+
 A_TYPE *setTypeAndKindOfDeclarator(A_TYPE *, ID_KIND, A_ID *);
 
 // Find previously used same identifier and if there isn't, create a symbol
@@ -371,7 +417,7 @@ BOOLEAN isNotSameFormalParameters(A_ID *prototype, A_ID *definition) {
     return FALSE;
 }
 
-// if t1 or t2 are
+// if t1 or t2 are same, return false
 BOOLEAN isNotSameType(A_TYPE *t1, A_TYPE *t2) {
   if (isPointerOrArrayType(t1) && isPointerOrArrayType(t2))
     return t1->expr != t2->expr

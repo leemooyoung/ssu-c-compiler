@@ -47,7 +47,7 @@ A_ID *makeIdentifier(char *s) {
 }
 
 // check if references configured well when end of scope
-void checkForwardReference() {
+void checkForwardReference(void) {
   A_ID *id;
   A_TYPE *t;
   id = current_id;

@@ -255,46 +255,56 @@ direct_abstract_declarator
     { $$ = setTypeElementType($1, setTypeExpr(makeType(T_FUNC), $3)); }
     ;
 statement_list_opt
-    :
-    | statement_list
+    : { $$ = makeNode(N_STMT_LIST_NIL, 0, 0, 0); }
+    | statement_list { $$ = $1; }
     ;
 statement_list
     : statement
-    | statement_list statement
+    { $$ = makeNode(N_STMT_LIST, $1, 0, makeNode(N_STMT_LIST_NIL, 0, 0, 0)); }
+    | statement_list statement { $$ = makeNode(N_STMT_LIST, $1, 0, $2); }
     ;
 statement
-    : labeled_statement
-    | compound_statement
-    | expression_statement
-    | selection_statement
-    | iteration_statement
-    | jump_statement
+    : labeled_statement { $$ = $1; }
+    | compound_statement { $$ = $1; }
+    | expression_statement { $$ = $1; }
+    | selection_statement { $$ = $1; }
+    | iteration_statement { $$ = $1; }
+    | jump_statement { $$ = $1; }
     ;
 labeled_statement
     : CASE_SYM constant_expression COLON statement
+    { $$ = makeNode(N_STMT_LABEL_CASE, $2, 0, $4); }
     | DEFAULT_SYM COLON statement
+    { $$ = makeNode(N_STMT_LABEL_DEFAULT, 0, $3, 0); }
     ;
 compound_statement
     : LR { $$ = current_id; current_level++; } declaration_list_opt
     statement_list_opt RR
-    { checkForwardReference(); current_level--; current_id = $2; }
+    { checkForwardReference(); makeNode(N_STMT_COMPOUND, $3, 0, $4);
+    current_level--; current_id = $2; }
     ;
 expression_statement
-    : SEMICOLON
-    | expression SEMICOLON
+    : SEMICOLON { $$ = makeNode(N_STMT_EMPTY, 0, 0, 0); }
+    | expression SEMICOLON { $$ = makeNode(N_STMT_EXPRESSION, 0, $1, 0); }
     ;
 selection_statement
-    : IF_SYM LP expression RP statement
+    : IF_SYM LP expression RP statement { $$ = makeNode(N_STMT_IF, $3, 0, $5); }
     | IF_SYM LP expression RP statement ELSE_SYM statement
+    { $$ = makeNode(N_STMT_IF_ELSE, $3, $5, $7); }
     | SWITCH_SYM LP expression RP statement
+    { $$ = makeNode(N_STMT_SWITCH, $3, 0, $5); }
     ;
 iteration_statement
     : WHILE_SYM LP expression RP statement
+    { $$ = makeNode(N_STMT_WHILE, $3, 0, $5); }
     | DO_SYM statement WHILE_SYM LP expression RP SEMICOLON
+    { $$ = makeNode(N_STMT_DO, $2, 0, $5); }
     | FOR_SYM LP for_expression RP statement
+    { $$ = makeNode(N_STMT_FOR, $3, 0, $5); }
     ;
 for_expression
     : expression_opt SEMICOLON expression_opt SEMICOLON expression_opt
+    { $$ = makeNode(N_FOR_EXP, $1, $3, $5); }
     ;
 expression_opt
     : { $$ = NIL; }
@@ -302,8 +312,9 @@ expression_opt
     ;
 jump_statement
     : RETURN_SYM expression_opt SEMICOLON
-    | CONTINUE_SYM SEMICOLON
-    | BREAK_SYM SEMICOLON
+    { $$ = makeNode(N_STMT_RETURN, 0, $2, 0); }
+    | CONTINUE_SYM SEMICOLON { $$ = makeNode(N_STMT_CONTINUE, 0, 0, 0); }
+    | BREAK_SYM SEMICOLON { $$ = makeNode(N_STMT_BREAK, 0, 0, 0); }
     ;
 arg_expression_list_opt
     : { $$ = makeNode(N_ARG_LIST_NIL, 0, 0, 0); }

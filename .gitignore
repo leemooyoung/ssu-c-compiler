@@ -1,8 +1,7 @@
 *.out
 *.o
 *.d
+*.test.c
 lex.yy.c
 y.tab.c
 y.tab.h
-
-ssu_c_test.c

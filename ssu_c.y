@@ -146,7 +146,7 @@ struct_type_specifier
     | struct_or_union { $$ = makeType($1); } LR
     { $$ = current_id; current_level++; } struct_declaration_list RR
     { checkForwardReference(); $$ = setTypeField($2, $5);
-    current_level--; current_id = $3; }
+    current_level--; current_id = $4; }
     | struct_or_union IDENTIFIER
     { $$ = getTypeOfStructOrEnumRefIdentifier($1, $2, ID_STRUCT); }
     ;
@@ -261,7 +261,7 @@ statement_list_opt
 statement_list
     : statement
     { $$ = makeNode(N_STMT_LIST, $1, 0, makeNode(N_STMT_LIST_NIL, 0, 0, 0)); }
-    | statement_list statement { $$ = makeNode(N_STMT_LIST, $1, 0, $2); }
+    | statement_list statement { $$ = makeNodeList(N_STMT_LIST, $1, $2); }
     ;
 statement
     : labeled_statement { $$ = $1; }
@@ -280,7 +280,7 @@ labeled_statement
 compound_statement
     : LR { $$ = current_id; current_level++; } declaration_list_opt
     statement_list_opt RR
-    { checkForwardReference(); makeNode(N_STMT_COMPOUND, $3, 0, $4);
+    { checkForwardReference(); $$ = makeNode(N_STMT_COMPOUND, $3, 0, $4);
     current_level--; current_id = $2; }
     ;
 expression_statement
@@ -324,7 +324,7 @@ arg_expression_list
     : assignment_expression
     { $$ = makeNode(N_ARG_LIST, $1, 0, makeNode(N_ARG_LIST_NIL, 0, 0, 0)); }
     | arg_expression_list COMMA assignment_expression
-    { $$ = makeNode(N_ARG_LIST, $1, 0, $3); }
+    { $$ = makeNodeList(N_ARG_LIST, $1, $3); }
     ;
 constant_expression_opt
     : { $$ = NIL; }

@@ -290,7 +290,7 @@ A_ID *setFunctionDeclaratorSpecifier(A_ID *id, A_SPECIFIER *p) {
   setDefaultSpecifier(p);
 
   // check if declarator type is function
-  if (id->type->kind != T_FUNC) {
+  if (id->type == NIL || id->type->kind != T_FUNC) {
     syntax_error(21, NULL);
     return id;
   } else {

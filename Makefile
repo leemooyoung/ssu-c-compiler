@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -Wno-int-conversion -MMD
+CFLAGS = -Wno-int-conversion -MMD -g
 
-ssu_c.out: lex.yy.o y.tab.o support.o ssu_c_main.o
+ssu_c.out: lex.yy.o y.tab.o support.o print.o ssu_c_main.o
 	$(CC) $^ -o ssu_c.out
 
 y.tab.c y.tab.h: ssu_c.y

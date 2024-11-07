@@ -244,7 +244,13 @@ A_ID *setDeclaratorElementType(A_ID *id, A_TYPE *t) {
   return id;
 }
 
-A_ID *setDeclaratorTypeAndKind(A_ID *, A_TYPE *, ID_KIND);
+// for initialize
+// configure type and kind of symbol table
+A_ID *setDeclaratorTypeAndKind(A_ID *id, A_TYPE *t, ID_KIND k) {
+  id = setDeclaratorElementType(id, t);
+  id = setDeclaratorKind(id, k);
+  return id;
+}
 
 A_ID *setDeclaratorListSpecifier(A_ID *id, A_SPECIFIER *p) {
   A_ID *a;
@@ -385,7 +391,16 @@ A_TYPE *setTypeExpr(A_TYPE *t, A_NODE *n) {
   return t;
 }
 
-A_TYPE *setTypeAndKindOfDeclarator(A_TYPE *, ID_KIND, A_ID *);
+// for initialize
+// make symbol table and return type
+A_TYPE *setTypeAndKindOfDeclarator(A_TYPE *t, ID_KIND k, A_ID *id) {
+  if (searchIdentifierAtCurrentLevel(id->name, id->prev))
+    syntax_error(12, id->name);
+
+  id->type = t;
+  id->kind = k;
+  return t;
+}
 
 // Find previously used same identifier and if there isn't, create a symbol
 // table for given identifier. The main difference between getTypeOfStruct~ is
@@ -448,10 +463,68 @@ BOOLEAN isPointerOrArrayType(A_TYPE *t) {
     return FALSE;
 }
 
-void initialize(void);  // {
-//   // set primitive data types
-//   int_type = setTypeAndKindOfDeclarator();
-// }
+void initialize(void) {
+  // set primitive data types
+  int_type = setTypeAndKindOfDeclarator(
+    makeType(T_ENUM), ID_TYPE, makeIdentifier("int")
+  );
+  float_type = setTypeAndKindOfDeclarator(
+    makeType(T_ENUM), ID_TYPE, makeIdentifier("float")
+  );
+  char_type = setTypeAndKindOfDeclarator(
+    makeType(T_ENUM), ID_TYPE, makeIdentifier("char")
+  );
+  void_type = setTypeAndKindOfDeclarator(
+    makeType(T_VOID), ID_TYPE, makeIdentifier("void")
+  );
+  string_type = setTypeElementType(makeType(T_POINTER), char_type);
+
+  int_type->size = 4;
+  int_type->check = TRUE;
+  float_type->size = 4;
+  float_type->check = TRUE;
+  char_type->size = 1;
+  char_type->check = TRUE;
+  void_type->size = 0;
+  void_type->check = TRUE;
+  string_type->size = 4;
+  string_type->check = TRUE;
+
+  // make library function symbol table
+  // printf
+  setDeclaratorTypeAndKind(
+    makeIdentifier("printf"),
+    setTypeField(
+      setTypeElementType(makeType(T_FUNC), void_type),
+      linkDeclaratorList(
+        setDeclaratorTypeAndKind(makeDummyIdentifier(), string_type, ID_PARAM),
+        setDeclaratorKind(makeDummyIdentifier(), ID_PARAM)
+      )
+    ),
+    ID_FUNC
+  );
+  // scanf
+  setDeclaratorTypeAndKind(
+    makeIdentifier("scanf"),
+    setTypeField(
+      setTypeElementType(makeType(T_FUNC), void_type),
+      linkDeclaratorList(
+        setDeclaratorTypeAndKind(makeDummyIdentifier(), string_type, ID_PARAM),
+        setDeclaratorKind(makeDummyIdentifier(), ID_PARAM)
+      )
+    ),
+    ID_FUNC
+  );
+  // malloc
+  setDeclaratorTypeAndKind(
+    makeIdentifier("malloc"),
+    setTypeField(
+      setTypeElementType(makeType(T_FUNC), string_type),
+      setDeclaratorTypeAndKind(makeDummyIdentifier(), int_type, ID_PARAM)
+    ),
+    ID_FUNC
+  );
+}
 
 void syntax_error(int i, char *s) {
   syntax_err++;

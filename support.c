@@ -449,11 +449,19 @@ BOOLEAN isNotSameFormalParameters(A_ID *prototype, A_ID *definition) {
 
 // if t1 or t2 are same, return false
 BOOLEAN isNotSameType(A_TYPE *t1, A_TYPE *t2) {
-  if (isPointerOrArrayType(t1) && isPointerOrArrayType(t2))
-    return t1->expr != t2->expr
-           || isNotSameType(t1->element_type, t2->element_type);
-  else
-    return t1 != t2;
+  if (isPointerOrArrayType(t1) && isPointerOrArrayType(t2)) {
+    t1 = t1->element_type;
+    t2 = t2->element_type;
+  }
+
+  while (isPointerOrArrayType(t1) && isPointerOrArrayType(t2)) {
+    if (t1->expr != t2->expr) return TRUE;
+
+    t1 = t1->element_type;
+    t2 = t2->element_type;
+  }
+
+  return t1 != t2;
 }
 
 BOOLEAN isPointerOrArrayType(A_TYPE *t) {

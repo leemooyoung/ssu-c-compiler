@@ -612,8 +612,11 @@ A_TYPE *sem_expression(A_NODE *node) {
       result = sem_expression(node->llink);
       // check if modifiable Ivalue
       if (!isModifiableLvalue(node->llink)) semantic_error(60, node->line, NIL);
-      t = sem_expression(node->llink);
+      t = sem_expression(node->rlink);
       if (isAllowableAssignmentConversion(result, t, node->rlink)) {
+        if (isPointerType(result) && isPointerType(t)
+            && !isCompatiblePointerType(result, t))
+          semantic_warning(11, node->line);
         if (isArithmeticType(result) && isArithmeticType(t))
           node->rlink = convertUsualAssignmentConversion(result, node->rlink);
       } else
@@ -826,16 +829,16 @@ BOOLEAN isAllowableAssignmentConversion(
     return TRUE;
   else if (isStructOrUnionType(t1) && isCompatibleType(t1, t2))
     return TRUE;
-  else if (isPointerType(t1)
-           && (isConstantZeroExp(node) || isCompatiblePointerType(t1, t2)))
+  else if (isPointerType(t1) && (isConstantZeroExp(node) || isPointerType(t2)))
     return TRUE;
   else
     return FALSE;
 }
 
 BOOLEAN isAllowableCastingConversion(A_TYPE *t1, A_TYPE *t2) {  // t1 <--- t2
-  if (isAnyIntegerType(t1)
-      && (isAnyIntegerType(t2) || isFloatType(t2) || isPointerType(t2)))
+  if (isAnyIntegerType(t1) && (isScalarType(t2)))
+    return TRUE;
+  else if (isIntegralType(t1) && isArithmeticType(t2))
     return TRUE;
   else if (isFloatType(t1) && isArithmeticType(t2))
     return TRUE;

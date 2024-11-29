@@ -1,7 +1,7 @@
-#include "type.h"
-
 #ifndef __SSU_C_SUPPORT__
 #define __SSU_C_SUPPORT__
+
+#include "type.h"
 
 extern A_TYPE *int_type, *char_type, *void_type, *float_type, *string_type;
 extern A_NODE *root;

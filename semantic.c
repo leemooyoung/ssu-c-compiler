@@ -180,6 +180,7 @@ int sem_A_TYPE(A_TYPE *t) {
       id = t->field;
       while (id) {
         result += sem_declaration(id, result);
+        if (id->type == t) semantic_error(84, id->line, NIL);
         id = id->link;
       }
       break;
@@ -188,6 +189,7 @@ int sem_A_TYPE(A_TYPE *t) {
       while (id) {
         i = sem_declaration(id, 0);
         if (i > result) result = i;
+        if (id->type == t) semantic_error(84, id->line, NIL);
         id = id->link;
       }
       break;

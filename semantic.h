@@ -48,6 +48,7 @@ void semantic_warning(int, int);
 void semantic_error(int, int, char *);
 
 extern A_LITERAL literal_table[];
+extern int literal_no;
 extern int semantic_err;
 
 #endif

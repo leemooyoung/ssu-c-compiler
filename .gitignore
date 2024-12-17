@@ -1,7 +1,11 @@
+*.test.c
+
 *.o
 *.d
-*.test.c
-lex.yy.c
-y.tab.c
-y.tab.h
+
+lex.*.c
+*.tab.c
+*.tab.h
+
 ssu_c
+interp

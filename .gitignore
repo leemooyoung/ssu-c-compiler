@@ -10,3 +10,5 @@ lex.*.c
 
 ssu_c
 interp
+
+.vscode/launch.json

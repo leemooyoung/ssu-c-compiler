@@ -76,7 +76,7 @@ void gen_declaration(A_ID *id) {
     case ID_FUNC:
       if (id->type->expr) {
         gen_label_name(id->name);
-        gen_code_i(INT, 0, id->type->size);
+        gen_code_i(INT, 0, id->type->local_var_size);
         gen_statement(id->type->expr, 0, 0);
         gen_code_i(RET, 0, 0);
       }

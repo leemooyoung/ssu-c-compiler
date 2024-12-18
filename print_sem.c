@@ -1,5 +1,7 @@
 #include "print_sem.h"
 
+#include <stdio.h>
+
 #include "print.h"
 #include "semantic.h"
 #include "support.h"
@@ -15,7 +17,7 @@ void prt_sem_program(A_NODE *node, int s) {
 
   switch (node->name) {
     case N_PROGRAM:
-      prt_sem_A_ID_LIST(node->clink, s + 1);
+      prt_sem_A_ID_LIST((A_ID *)node->clink, s + 1);
       break;
     default:
       printf("****syntax tree error******");
@@ -44,7 +46,7 @@ void prt_sem_expression(A_NODE *node, int s) {
   print_node(node, s);
   switch (node->name) {
     case N_EXP_IDENT:
-      prt_sem_A_ID_NAME(node->clink, s + 1);
+      prt_sem_A_ID_NAME((A_ID *)node->clink, s + 1);
       break;
     case N_EXP_INT_CONST:
       prt_sem_integer(node->clink, s + 1);
@@ -68,11 +70,11 @@ void prt_sem_expression(A_NODE *node, int s) {
       break;
     case N_EXP_STRUCT:
       prt_sem_expression(node->llink, s + 1);
-      prt_sem_A_ID_NAME(node->rlink, s + 1);
+      prt_sem_A_ID_NAME((A_ID *)node->rlink, s + 1);
       break;
     case N_EXP_ARROW:
       prt_sem_expression(node->llink, s + 1);
-      prt_sem_A_ID_NAME(node->rlink, s + 1);
+      prt_sem_A_ID_NAME((A_ID *)node->rlink, s + 1);
       break;
     case N_EXP_POST_INC:
     case N_EXP_POST_DEC:
@@ -90,7 +92,7 @@ void prt_sem_expression(A_NODE *node, int s) {
       prt_sem_integer(node->clink, s + 1);
       break;
     case N_EXP_CAST:
-      prt_sem_A_TYPE(node->llink, s + 1);
+      prt_sem_A_TYPE((A_TYPE *)node->llink, s + 1);
       prt_sem_expression(node->rlink, s + 1);
       break;
     case N_EXP_MUL:
@@ -142,7 +144,7 @@ void prt_sem_statement(A_NODE *node, int s) {
       prt_sem_statement(node->clink, s + 1);
       break;
     case N_STMT_COMPOUND:
-      if (node->llink) prt_sem_A_ID_LIST(node->llink, s + 1);
+      if (node->llink) prt_sem_A_ID_LIST((A_ID *)node->llink, s + 1);
       prt_sem_statement_list(node->rlink, s + 1);
       break;
     case N_STMT_EMPTY:
@@ -245,7 +247,7 @@ void prt_sem_A_TYPE(A_TYPE *t, int s) {
   else if (t->kind == T_NULL)
     printf("(null)\n");
   else if (t->prt == FALSE)
-    printf("(DONE:%x)\n", t);
+    printf("(DONE:%p)\n", t);
   else
     switch (t->kind) {
       case T_ENUM:
@@ -313,7 +315,7 @@ void prt_sem_A_ID_LIST(A_ID *id, int s) {
 void prt_sem_A_ID_NAME(A_ID *id, int s) {
   print_space(s);
   printf(
-    "(ID=\"%s\") TYPE:%x KIND:%s SPEC=%s LEV=%d VAL=%d ADDR=%d \n", id->name,
+    "(ID=\"%s\") TYPE:%p KIND:%s SPEC=%s LEV=%d VAL=%d ADDR=%d \n", id->name,
     id->type, id_kind_name[id->kind], spec_name[id->specifier], id->level,
     id->value, id->address
   );
@@ -322,7 +324,7 @@ void prt_sem_A_ID_NAME(A_ID *id, int s) {
 void prt_sem_A_ID(A_ID *id, int s) {
   print_space(s);
   printf(
-    "(ID=\"%s\") TYPE:%x KIND:%s SPEC=%s LEV=%d VAL=%d ADDR=%d \n", id->name,
+    "(ID=\"%s\") TYPE:%p KIND:%s SPEC=%s LEV=%d VAL=%d ADDR=%d \n", id->name,
     id->type, id_kind_name[id->kind], spec_name[id->specifier], id->level,
     id->value, id->address
   );

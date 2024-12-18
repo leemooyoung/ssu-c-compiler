@@ -6,6 +6,7 @@ DEPS = \
 	y.tab.o\
 	support.o\
 	semantic.o\
+	gen.o\
 	print.o\
 	print_sem.o\
 	ssu_c_main.o\

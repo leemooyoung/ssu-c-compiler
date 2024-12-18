@@ -51,7 +51,7 @@ int put_literal(A_LITERAL lit, int ll) {
 void sem_program(A_NODE *node) {
   switch (node->name) {
     case N_PROGRAM:
-      sem_declaration_list(node->clink, 12);
+      sem_declaration_list((A_ID *)node->clink, 12);
       node->value = global_address;
       break;
     default:
@@ -239,7 +239,8 @@ int sem_statement(
       local_size = sem_statement(node->clink, addr, ret, sw, brk, cnt);
       break;
     case N_STMT_COMPOUND:
-      if (node->llink) local_size = sem_declaration_list(node->llink, addr);
+      if (node->llink)
+        local_size = sem_declaration_list((A_ID *)node->llink, addr);
       local_size += sem_statement_list(
         node->rlink, local_size + addr, ret, sw, brk, cnt
       );
@@ -365,7 +366,7 @@ A_TYPE *sem_expression(A_NODE *node) {
 
   switch (node->name) {
     case N_EXP_IDENT:
-      id = node->clink;
+      id = (A_ID *)node->clink;
       switch (id->kind) {
         case ID_VAR:
         case ID_PARAM:
@@ -388,7 +389,7 @@ A_TYPE *sem_expression(A_NODE *node) {
       break;
     case N_EXP_FLOAT_CONST:
       lit.type = float_type;
-      lit.value.f = atof(node->clink);
+      lit.value.f = atof((char *)node->clink);
       node->clink = put_literal(lit, node->line);
       result = float_type;
       break;
@@ -397,7 +398,7 @@ A_TYPE *sem_expression(A_NODE *node) {
       break;
     case N_EXP_STRING_LITERAL:
       lit.type = string_type;
-      lit.value.s = node->clink;
+      lit.value.s = (char *)node->clink;
       node->clink = put_literal(lit, node->line);
       result = string_type;
       break;
@@ -420,25 +421,25 @@ A_TYPE *sem_expression(A_NODE *node) {
       break;
     case N_EXP_STRUCT:
       t = sem_expression(node->llink);
-      id = getStructFieldIdentifier(t, node->rlink);
+      id = getStructFieldIdentifier(t, (char *)node->rlink);
       if (id) {
         result = id->type;
         if (node->llink->value && !isArrayType(result)) lvalue = TRUE;
       } else
         semantic_error(37, node->line, NIL);
 
-      node->rlink = id;
+      node->rlink = (A_NODE *)id;
       break;
     case N_EXP_ARROW:
       t = sem_expression(node->llink);
-      id = getPointerFieldIdentifier(t, node->rlink);
+      id = getPointerFieldIdentifier(t, (char *)node->rlink);
       if (id) {
         result = id->type;
         if (!isArrayType(result)) lvalue = TRUE;
       } else
         semantic_error(37, node->line, NIL);
 
-      node->rlink = id;
+      node->rlink = (A_NODE *)id;
       break;
     case N_EXP_FUNCTION_CALL:
       t = sem_expression(node->llink);
@@ -458,14 +459,14 @@ A_TYPE *sem_expression(A_NODE *node) {
       if (!isModifiableLvalue(node->clink)) semantic_error(60, node->line, NIL);
       break;
     case N_EXP_CAST:
-      result = node->llink;
+      result = (A_TYPE *)node->llink;
       i = sem_A_TYPE(result);
       t = sem_expression(node->rlink);
       if (!isAllowableCastingConversion(result, t))
         semantic_error(58, node->line, NIL);
       break;
     case N_EXP_SIZE_TYPE:
-      t = node->clink;
+      t = (A_TYPE *)node->clink;
       i = sem_A_TYPE(t);
       if (isArrayType(t) && t->size == 0 || isFunctionType(t) || isVoidType(t))
         semantic_error(39, node->line, NIL);
@@ -753,7 +754,7 @@ BOOLEAN isCompatiblePointerType(A_TYPE *t1, A_TYPE *t2) {
 A_NODE *convertScalarToInteger(A_NODE *node) {
   if (isFloatType(node->type)) {
     semantic_warning(16, node->line);
-    node = makeNode(N_EXP_CAST, int_type, NIL, node);
+    node = makeNode(N_EXP_CAST, (A_NODE *)int_type, NIL, node);
   }
   node->type = int_type;
   return node;
@@ -764,7 +765,7 @@ A_NODE *convertUsualAssignmentConversion(A_TYPE *t1, A_NODE *node) {
   t2 = node->type;
   if (!isCompatibleType(t1, t2)) {
     semantic_warning(11, node->line);
-    node = makeNode(N_EXP_CAST, t1, NIL, node);
+    node = makeNode(N_EXP_CAST, (A_NODE *)t1, NIL, node);
     node->type = t1;
   }
   return node;
@@ -775,12 +776,12 @@ A_NODE *convertUsualUnaryConversion(A_NODE *node) {
   t = node->type;
   if (t == char_type) {
     t = int_type;
-    node = makeNode(N_EXP_CAST, t, NIL, node);
+    node = makeNode(N_EXP_CAST, (A_NODE *)t, NIL, node);
     node->type = t;
   } else if (isArrayType(t)) {
     t = setTypeElementType(makeType(T_POINTER), t->element_type);
     t->size = 4;
-    node = makeNode(N_EXP_CAST, t, NIL, node);
+    node = makeNode(N_EXP_CAST, (A_NODE *)t, NIL, node);
     node->type = t;
   } else if (isFunctionType(t)) {
     t = setTypeElementType(makeType(T_POINTER), t);
@@ -797,12 +798,12 @@ A_TYPE *convertUsualBinaryConversion(A_NODE *node) {
   t2 = node->rlink->type;
   if (isFloatType(t1) && !isFloatType(t2)) {
     semantic_warning(14, node->line);
-    node->rlink = makeNode(N_EXP_CAST, t1, NIL, node->rlink);
+    node->rlink = makeNode(N_EXP_CAST, (A_NODE *)t1, NIL, node->rlink);
     node->rlink->type = t1;
     result = t1;
   } else if (!isFloatType(t1) && isFloatType(t2)) {
     semantic_warning(14, node->line);
-    node->llink = makeNode(N_EXP_CAST, t2, NIL, node->llink);
+    node->llink = makeNode(N_EXP_CAST, (A_NODE *)t2, NIL, node->llink);
     node->llink->type = t2;
     result = t2;
   } else if (t1 == t2)
@@ -817,7 +818,7 @@ A_NODE *convertCastingConversion(A_NODE *node, A_TYPE *t1) {
   t2 = node->type;
   if (!isCompatibleType(t1, t2)) {
     semantic_warning(12, node->line);
-    node = makeNode(N_EXP_CAST, t1, NIL, node);
+    node = makeNode(N_EXP_CAST, (A_NODE *)t1, NIL, node);
     node->type = t1;
   }
   return node;
@@ -969,7 +970,7 @@ A_LITERAL getTypeAndValueOfExpression(A_NODE *node) {
   result.type = NIL;
   switch (node->name) {
     case N_EXP_IDENT:
-      id = node->clink;
+      id = (A_ID *)node->clink;
       if (id->kind != ID_ENUM_LITERAL)
         semantic_error(19, node->line, id->name);
       else {
@@ -987,7 +988,7 @@ A_LITERAL getTypeAndValueOfExpression(A_NODE *node) {
       break;
     case N_EXP_FLOAT_CONST:
       result.type = float_type;
-      result.value.f = atof(node->clink);
+      result.value.f = atof((char *)node->clink);
       break;
     case N_EXP_STRING_LITERAL:
     case N_EXP_ARRAY:
@@ -1019,7 +1020,7 @@ A_LITERAL getTypeAndValueOfExpression(A_NODE *node) {
       break;
     case N_EXP_SIZE_TYPE:
       result.type = int_type;
-      result.value.i = sem_A_TYPE(node->clink);
+      result.value.i = sem_A_TYPE((A_TYPE *)node->clink);
       break;
     case N_EXP_CAST:
       result = getTypeAndValueOfExpression(node->rlink);

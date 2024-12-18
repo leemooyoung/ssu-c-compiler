@@ -50,7 +50,7 @@ void gen_program(A_NODE *node) {
       gen_code_i(INT, 0, node->value);
       gen_code_s(SUP, 0, "main");
       gen_code_i(RET, 0, 0);
-      gen_declaration_list(node->clink);
+      gen_declaration_list((A_ID *)node->clink);
       break;
   }
 }
@@ -137,7 +137,7 @@ void gen_statement(A_NODE *node, int cont_label, int break_label) {
     //   // not implemented
     //   break;
     case N_STMT_WHILE:
-      gen_label_number(l1 = get_lable());
+      gen_label_number(l1 = get_label());
       gen_expression(node->llink);
       gen_code_l(JPC, 0, l2 = get_label());
       gen_statement(node->rlink, l1, l2);
@@ -219,7 +219,7 @@ void gen_expression(A_NODE *node) {
   int i, ll;
   switch (node->name) {
     case N_EXP_IDENT:
-      id = node->clink;
+      id = (A_ID *)node->clink;
       t = id->type;
       switch (id->kind) {
         case ID_VAR:
@@ -544,13 +544,13 @@ void gen_expression(A_NODE *node) {
       break;
     case N_EXP_AND:
       gen_expression(node->llink);
-      gen_code_l(JPCR, 0, ll = get_lable());
+      gen_code_l(JPCR, 0, ll = get_label());
       gen_expression(node->rlink);
       gen_label_number(ll);
       break;
     case N_EXP_OR:
       gen_expression(node->llink);
-      gen_code_l(JPTR, 0, ll = get_lable());
+      gen_code_l(JPTR, 0, ll = get_label());
       gen_expression(node->rlink);
       gen_label_number(ll);
       break;
@@ -575,7 +575,7 @@ void gen_expression_left(A_NODE *node) {
   int result;
   switch (node->name) {
     case N_EXP_IDENT:
-      id = node->clink;
+      id = (A_ID *)node->clink;
       t = id->type;
       switch (id->kind) {
         case ID_VAR:

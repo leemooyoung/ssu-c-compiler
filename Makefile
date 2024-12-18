@@ -36,7 +36,7 @@ lex.interp.c: interp.l interp.tab.h
 	lex -o lex.interp.c interp.l
 
 clean:
-	rm -f ssu_c *.tab.c *.tab.h lex.*.c *.o *.d
+	rm -f ssu_c interp *.tab.c *.tab.h lex.*.c *.o *.d
 
 # cancel implicit rule for yacc and lex
 

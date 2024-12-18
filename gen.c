@@ -106,9 +106,10 @@ void gen_statement(A_NODE *node, int cont_label, int break_label) {
     // case N_STMT_LABEL_DEFAULT:
     //   // not implemented
     //   break;
-    // case N_STMT_COMPOUND:
-    //   // ????????
-    //   break;
+    case N_STMT_COMPOUND:
+      if (node->llink) gen_declaration_list((A_ID *)node->llink);
+      gen_statement_list(node->rlink, cont_label, break_label);
+      break;
     case N_STMT_EMPTY:
       break;
     case N_STMT_EXPRESSION:

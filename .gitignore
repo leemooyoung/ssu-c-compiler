@@ -1,8 +1,7 @@
-*.test.c
+test/*
 
 *.o
 *.d
-*.asm
 
 lex.*.c
 *.tab.c
